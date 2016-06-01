@@ -18,6 +18,8 @@ create or replace PACKAGE         enrolments
 END enrolments;
 
 
+select * from CANDS;
+
 create or replace PACKAGE BODY enrolments
 AS
 
@@ -43,22 +45,24 @@ AS
 
   PROCEDURE list_applications
   IS
-  v_sqlselect      VARCHAR2(2000);
+  v_sqlselect      VARCHAR2(30000);
   v_queryctx       DBMS_XMLQuery.ctxType;
-  candidates xmltype;
-  re       CLOB;
+  v_clob_par        NCLOB;
+  v_offset number default 1;
+  v_chunk_size number := 10000;
  begin
- select xmlagg(xmlelement("candidates",
-  xmlattributes('c' || cands.bi as bi)),
-  xmlelement("curso", cands.curso),
-  --xmlelement("ano_lectivo", cands.ano_lectivo),
-  xmlelement("resultado", cands.resultado),
-  xmlelement("media", cands.media)
-)
-into re
-from cands;
-        
-        htp.p(re);      
+  v_sqlselect := 'SELECT c.BI, c.CURSO, c.ANO_LECTIVO, c.RESULTADO, c.MEDIA
+  FROM CANDS c
+  ';
+  v_queryctx := DBMS_XMLQuery.newContext(v_sqlselect);
+  DBMS_XMLQuery.setEncodingTag(v_queryctx, 'ISO-8859-1');
+  v_clob_par := DBMS_XMLQuery.getXML(v_queryctx);
+  DBMS_XMLQuery.closeContext(v_queryctx);
+  loop
+          exit when v_offset > dbms_lob.getlength(v_clob_par);
+          htp.p( dbms_lob.substr( v_clob_par, v_chunk_size, v_offset ) );
+          v_offset := v_offset +  v_chunk_size;
+      end loop;
   END list_applications; 
 
   PROCEDURE list_enrolments
@@ -80,6 +84,8 @@ from cands;
   WHEN OTHERS THEN
     htp.p(SQLERRM);
   END list_enrolments; 
+
+
 
   PROCEDURE list_years
   IS

@@ -47,7 +47,7 @@ AS
   IS
   v_sqlselect      VARCHAR2(30000);
   v_queryctx       DBMS_XMLQuery.ctxType;
-  v_clob_par        NCLOB;
+  v_clob_par        CLOB;
   v_offset number default 1;
   v_chunk_size number := 10000;
  begin

@@ -15,7 +15,7 @@ def index(path):
 def hello():
     return "Hello World!"
 
-    @route('/a')
+@route('/a')
 def index():
     return template()
 

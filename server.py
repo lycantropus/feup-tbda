@@ -59,5 +59,9 @@ def index():
     alus.insert_one(document)
     return "putas e VV"
 
+@route('/a')
+def index():
+	
+	return "ganda query"
 
 run(host='0.0.0.0', port=8080, debug=True)

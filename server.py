@@ -159,6 +159,16 @@ def index():
 
 @route('/c')
 def index():
+    cursor = alus.aggregate([
+        #{'$project': {'numero_anos' : {'$subtract': ['a_lect_conclusao', 'a_lect_matricula' ] }}},
+        {'$project': {'_id': 0}},
+        {'$group': {'_id': 'null', 'numero_anos': {'$subtract': ['a_lect_conclusao', 'a_lect_matricula']},
+                    'avgmedia': {'$avg': 'med_final'}}}
+    ])
+
+    for document in cursor:
+        print(document)
+
     return 'c'
 
 run(host='0.0.0.0', port=8080, debug=True, reloader=True)

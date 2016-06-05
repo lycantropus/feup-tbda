@@ -38,7 +38,7 @@ def index():
         'http://oraalu.fe.up.pt:8888/aulas/WEB_DATA.json_years', auth=HTTPBasicAuth('ei12060', 'Vitor'))
     h = HTMLParser()
     document = json.loads(h.unescape(response.text))
-    years.insert_one(document)
+    years.insert(document)
 
     return "putas e VV"
 
@@ -49,7 +49,7 @@ def index():
         'http://oraalu.fe.up.pt:8888/aulas/WEB_DATA.json_cands', auth=HTTPBasicAuth('ei12060', 'Vitor'))
     h = HTMLParser()
     document = json.loads(h.unescape(response.text))
-    cands.insert_one(document)
+    cands.insert(document)
 
     return "vape nation \//\ "
 
@@ -61,7 +61,7 @@ def index():
     h = HTMLParser()
 
     document = json.loads(h.unescape(response.text))
-    alus.insert_one(document)
+    alus.insert(document)
     return "putas e VV"
 
 
@@ -109,19 +109,56 @@ def index():
     #    {'$match': {'curso.sigla': {'$in': ['EM', 'EC']}}},
     #    {'$project': {'curso.nome': True}}])
 
-    pipeline = [
-        {"$unwind": "$alus"},
-        {"$group": {"_id": "$alus"}}]
-    # result = alus.find()
+    # for ele in test[0]['alus']:
+    # print(ele)
+    # input()
 
-    pipelinecera = [
-        {"$match": {"a_lect_matricula": {"$gt": 1991}}},
-        {"$group": {'alus.a_lect_matricula': True, "count": {"$sum": 1}}}]
+    cursor = alus.aggregate([
+        {'$match': {'a_lect_matricula': {'$gt': 1991}}},
+        {'$group': {'_id': {'ano': '$a_lect_matricula',
+                            'curso': '$curso.nome'}, 'count': {'$sum': 1}}},
+        {'$sort': {'_id': 1}}
+        #{'$project': {'_id': 1, 'curso': 1, 'count': 1}}
+    ])
+
+    filtered = list()
+    for document in cursor:
+        filtered.append(document)
+
     info = {'title': 'Query 3a)',
-            'content': list(alus.aggregate(pipelinecera))
+            'content': filtered
             }
-    list(alus.aggregate(pipeline))
 
     return template('page.tpl', info)
+
+
+@route('/b')
+def index():
+    # cursor = alus.aggregate([
+     #   {'$where': 'this.med_final > this.cand.media'},
+      #  {'$group': {'_id': {'BI': '$bi', 'Numero': '$numero'}}}
+    #])
+    cursor = alus.aggregate([
+        {'$project': {
+            'bi': 1,
+            'numero': 1,
+            '_id': 0,
+            'med_maior': {'$gt': ['$med_final', '$cand.media']}, }},
+        {'$match': {'med_maior': True}}]
+    )
+
+    filtered = list()
+    for document in cursor:
+        filtered.append(document)
+    info = {'title': 'Query 3b)',
+            'content': filtered
+            }
+
+    return template('page.tpl', info)
+
+
+@route('/c')
+def index():
+    return 'c'
 
 run(host='0.0.0.0', port=8080, debug=True, reloader=True)

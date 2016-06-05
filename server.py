@@ -40,7 +40,7 @@ def index():
     document = json.loads(h.unescape(response.text))
     years.insert(document)
 
-    return "putas e VV"
+    return "OK"
 
 
 @route('/loadcands')
@@ -51,7 +51,7 @@ def index():
     document = json.loads(h.unescape(response.text))
     cands.insert(document)
 
-    return "vape nation \//\ "
+    return "OK"
 
 
 @route('/loadalus')
@@ -62,7 +62,7 @@ def index():
 
     document = json.loads(h.unescape(response.text))
     alus.insert(document)
-    return "putas e VV"
+    return "OK"
 
 
 @route('/years')
@@ -104,21 +104,12 @@ def index():
 
 @route('/a')
 def index():
-    print ('hey!')
-    # query = alus.find()[0]['alus'].aggregate([
-    #    {'$match': {'curso.sigla': {'$in': ['EM', 'EC']}}},
-    #    {'$project': {'curso.nome': True}}])
-
-    # for ele in test[0]['alus']:
-    # print(ele)
-    # input()
 
     cursor = alus.aggregate([
         {'$match': {'a_lect_matricula': {'$gt': 1991}}},
         {'$group': {'_id': {'ano': '$a_lect_matricula',
                             'curso': '$curso.nome'}, 'count': {'$sum': 1}}},
         {'$sort': {'_id': 1}}
-        #{'$project': {'_id': 1, 'curso': 1, 'count': 1}}
     ])
 
     filtered = list()
@@ -134,10 +125,7 @@ def index():
 
 @route('/b')
 def index():
-    # cursor = alus.aggregate([
-     #   {'$where': 'this.med_final > this.cand.media'},
-      #  {'$group': {'_id': {'BI': '$bi', 'Numero': '$numero'}}}
-    #])
+
     cursor = alus.aggregate([
         {'$project': {
             'bi': 1,
@@ -160,15 +148,28 @@ def index():
 @route('/c')
 def index():
     cursor = alus.aggregate([
-        #{'$project': {'numero_anos' : {'$subtract': ['a_lect_conclusao', 'a_lect_matricula' ] }}},
-        {'$project': {'_id': 0}},
-        {'$group': {'_id': 'null', 'numero_anos': {'$subtract': ['a_lect_conclusao', 'a_lect_matricula']},
-                    'avgmedia': {'$avg': 'med_final'}}}
+
+        {'$project': {'_id': 0, 'numero_anos': {
+            '$subtract': ['$a_lect_conclusao', '$a_lect_matricula']}, 'med_final': 1}},
+        {'$match': {'numero_anos': {'$gt': 5}}},
+        {'$group': {'_id': '$numero_anos',
+                    'media': {'$avg': '$med_final'}}},
+        {'$sort': {'_id': 1}}
     ])
 
+    filtered = list()
     for document in cursor:
+        filtered.append(document)
         print(document)
 
-    return 'c'
+    info = {'title': 'Query 3c)',
+            'content': filtered
+            }
+
+    return template('page.tpl', info)
 
 run(host='0.0.0.0', port=8080, debug=True, reloader=True)
+
+# cursor2 = alus.aggregate([
+#   {'$group': {'_id': None, 'avgmedia': {'$avg': '$med_final'}}}
+#])

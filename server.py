@@ -82,8 +82,8 @@ def index():
 @route('/alus')
 def index():
     result = alus.find()
-    info = {'title': 'Listagem de Anos',
-            'content': result[0]['alus']
+    info = {'title': 'Listagem de Inscrições',
+            'content': result
             }
 
     return template('page.tpl', info)
@@ -93,8 +93,8 @@ def index():
 def index():
     result = cands.find()
 
-    info = {'title': 'Listagem de Anos',
-            'content': result[0]['cands']
+    info = {'title': 'Listagem de Candidaturas',
+            'content': result
             }
 
     # print (result[0]['anos'])
@@ -169,7 +169,3 @@ def index():
     return template('page.tpl', info)
 
 run(host='0.0.0.0', port=8080, debug=True, reloader=True)
-
-# cursor2 = alus.aggregate([
-#   {'$group': {'_id': None, 'avgmedia': {'$avg': '$med_final'}}}
-#])
